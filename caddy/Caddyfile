@@ -1,0 +1,14 @@
+:80 {
+	root * /srv
+	encode gzip
+	templates
+
+	route {
+		try_files {path} {path}.md {path}.html
+		@markdown path *.md
+		rewrite @markdown /_post.html
+		@htmlpost path /posts/*.html
+		rewrite @htmlpost /_htmlpost.html
+		file_server
+	}
+}

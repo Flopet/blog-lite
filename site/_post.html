@@ -1,0 +1,23 @@
+{{- $path := trimSuffix ".md" .OriginalReq.URL.Path -}}
+{{- $md := include (printf "%s.md" $path) | splitFrontMatter -}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $md.Meta.title }} — asay.dev</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <a href="/" class="back">← All posts</a>
+    </header>
+    <article>
+        <h1>{{ $md.Meta.title }}</h1>
+        <time datetime="{{ $md.Meta.date }}">{{ $md.Meta.date }}</time>
+        <div class="content">
+            {{ markdown $md.Body }}
+        </div>
+    </article>
+</body>
+</html>

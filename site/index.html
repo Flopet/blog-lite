@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research — asay.dev</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header>
+        <h1>Research Notes</h1>
+        <p class="tagline">Experiments, explorations, and things I learned along the way.</p>
+    </header>
+
+    <main>
+        <ul class="post-list">
+            {{- $posts := listFiles "/posts" -}}
+            {{- $count := len $posts -}}
+            {{- range $i, $_ := $posts -}}
+                {{- $file := index $posts (sub (sub $count 1) $i) -}}
+                {{- $raw := include (printf "/posts/%s" $file) -}}
+                {{- $parsed := splitFrontMatter $raw -}}
+                {{- $slug := trimSuffix ".md" (trimSuffix ".html" $file) -}}
+                <li class="post-item">
+                    <a href="/posts/{{ $slug }}">
+                        <time datetime="{{ $parsed.Meta.date }}">{{ $parsed.Meta.date }}</time>
+                        <h2>{{ $parsed.Meta.title }}</h2>
+                        {{- with $parsed.Meta.summary -}}
+                            <p class="summary">{{ . }}</p>
+                        {{- end -}}
+                    </a>
+                </li>
+            {{- end -}}
+        </ul>
+    </main>
+
+    <footer>
+        <p>Hosted on FlopTower.</p>
+    </footer>
+</body>
+</html>

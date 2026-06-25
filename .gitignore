@@ -1,0 +1,15 @@
+# Environment
+.env
+
+# Caddy runtime state
+caddy/data/
+caddy/config/
+
+# Drafts (local only, not for publishing)
+drafts/
+
+# macOS
+.DS_Store
+
+# Session artifacts
+handoff.md
