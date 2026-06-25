@@ -1,7 +1,7 @@
 services:
   caddy:
     image: caddy:2-alpine
-    container_name: research-blog
+    container_name: blog-lite
     restart: unless-stopped
     ports:
       - "3939:80"
