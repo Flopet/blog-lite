@@ -5,23 +5,23 @@ A minimal self-hosted blog engine. No database, no build step, no CMS — just m
 ## Stack
 
 - **Caddy** — HTTP server with a built-in Go template engine
-- **Docker** — runs Caddy in a container
+- **Docker** — runs Caddy in a container on the production server
 - **Markdown / HTML** — posts are plain files with YAML front matter
 
 ## Project structure
 
 ```
 blog-lite/
-├── compose.yaml            # Docker Compose config
+├── Caddyfile               # Caddy config
+├── compose.yaml            # Docker Compose config (production)
+├── server.sh               # Local dev server (start/stop)
 ├── publish.sh              # Script to publish drafts to site/posts/
 ├── template.md             # Starter template for new posts
-├── caddy/
-│   └── Caddyfile           # Caddy config
 ├── drafts/                 # Local drafts (not committed)
 └── site/                   # Everything served to the web
     ├── index.html          # Dynamic homepage (lists all posts)
-    ├── _post.html          # Template that wraps markdown posts
-    ├── _htmlpost.html      # Template that wraps HTML posts
+    ├── _post.html          # Template wrapper for markdown posts
+    ├── _htmlpost.html      # Injects back button into HTML posts
     ├── static/
     │   └── style.css
     └── posts/
@@ -41,7 +41,7 @@ The script rewrites the Caddyfile's `root` to point at your local `site/` folder
 
 ## Production deployment
 
-`compose.yaml` is for deploying to the production server. It expects an `APPDATA_PATH` environment variable pointing to the project root on the host. Deployment is handled separately from local dev.
+`compose.yaml` is for deploying to the production server. It expects an `APPDATA_PATH` environment variable pointing to the project root on the host (with a trailing slash). Caddy data and config are stored in named Docker volumes.
 
 ## Writing a post
 
@@ -50,7 +50,7 @@ Posts are markdown or HTML files with a YAML front matter block at the top:
 ```markdown
 ---
 title: My Post Title
-date: 2026-06-24
+date: 6.24.2026
 summary: One sentence description shown on the homepage.
 ---
 
@@ -65,16 +65,23 @@ Save drafts to the `drafts/` folder, then publish with:
 ./publish.sh -r /path/to/blog-lite  # specify a different project root
 ```
 
-The publish script automatically escapes any `{{` and `}}` in your content so Caddy's template engine doesn't try to execute code examples as live templates.
+If a draft has no front matter, the publish script will prompt you for the title, date, and summary before publishing.
+
+The publish script also escapes any `{{` and `}}` in your content so Caddy's template engine doesn't treat code examples as live templates.
 
 ## HTML posts
 
-HTML files in `site/posts/` are supported. Use the same YAML front matter format — the front matter is stripped before rendering and the HTML body is wrapped in the standard site chrome.
+HTML files in `site/posts/` are fully supported. The post renders exactly as written — its own `<head>`, styles, and layout are preserved. The only additions are:
 
-## Deployment
+- YAML front matter is stripped before rendering
+- A fixed "← All posts" back link is injected at the top of `<body>`
 
-The container maps `site/` as a read-only volume. Caddy re-evaluates templates on every request, so new posts appear immediately without a restart. A Caddyfile change requires:
+## Caddyfile change
+
+The container mounts `Caddyfile` read-only. A config change requires:
 
 ```bash
 docker compose restart
 ```
+
+Caddy re-evaluates templates on every request, so new posts appear immediately without a restart.
